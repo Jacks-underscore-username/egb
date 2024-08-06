@@ -51,8 +51,8 @@ const os = require('os')
         process.exit(0)
     }
 
-    const formatPath = i => i.match(/(?<=^|\\+|\/+)([^//\\]+)(?=\\+|\/+|$)/g).join('/')
-    const localPath = (() => os.platform() === 'win32' ? (i => formatPath(i).replace(/\//g, '\\\\')) : (i => formatPath(i).replace(/\//g, '/')))();
+    const formatPath = i => i.replace(/\/+|\\+/g, '/')
+    const localPath = (() => os.platform() === 'win32' ? (i => formatPath(i).replace(/\//g, '\\\\')) : (i => formatPath(i)))();
 
     const { user, repo, tempFolder, ignoredPaths, passphrase } = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'config.json')))
 
