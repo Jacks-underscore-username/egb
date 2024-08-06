@@ -240,7 +240,7 @@ const os = require('os')
                 else filePromises.push((async () => {
                     if (!selfFiles.includes(itemPath)) {
                         let hash
-                        if (repoPaths.includes(itemPath)) {
+                        if (repoPaths.includes(formattedPath)) {
                             const entry = index.currentFiles.find(entry => entry.path === formattedPath)
                             if (Math.round(stat.mtimeMs) !== entry.mtime || stat.size !== entry.size) {
                                 hash = await hashFile(itemPath)
