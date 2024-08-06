@@ -279,7 +279,7 @@ const os = require('os')
         }
         process.chdir(path.join(__dirname, `${repo.toLowerCase()}.git`))
         index.currentFiles = []
-        console.log('Finding local file blobs')
+        console.log('Creating file blobs')
         let sendingSize = 0
         let sendingFiles = 0
         await Promise.all(localFiles.map(entry => (async () => {
