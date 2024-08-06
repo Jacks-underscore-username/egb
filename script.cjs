@@ -385,27 +385,27 @@ const os = require('os')
         await Promise.all(differences.map(async difference => {
             const entry = index.currentFiles.find(entry => entry.path === difference.path)
             if (difference.type === 'remote') {
-                console.log(`CREATE ${difference.path}`)
                 await promisify(exec)(`git --git-dir=${repo.toLowerCase()}.git show HEAD:data/${entry.randomName} > "${path.join(__dirname, tempFolder, entry.randomName)}"`)
                 await decryptFile(path.join(tempFolder, entry.randomName), difference.path)
                 await promisify(fs.rm)(path.join(__dirname, tempFolder, entry.randomName))
                 await promisify(fs.utimes)(path.join(__dirname, difference.path), new Date(), new Date(entry.mtime))
+                console.log(`CREATE ${difference.path}`)
             }
             else if (difference.type === 'local') {
-                console.log(`DELETE ${difference.path}`)
                 await promisify(fs.rm)(path.join(__dirname, difference.path))
+                console.log(`DELETE ${difference.path}`)
             }
             else if (difference.type === 'content') {
-                console.log(`SET ${difference.path}`)
                 await promisify(fs.rm)(path.join(__dirname, difference.path))
                 await promisify(exec)(`git --git-dir=${repo.toLowerCase()}.git show HEAD:data/${entry.randomName} > "${path.join(__dirname, tempFolder, entry.randomName)}"`)
                 await decryptFile(path.join(tempFolder, entry.randomName), difference.path)
                 await promisify(fs.rm)(path.join(__dirname, tempFolder, entry.randomName))
                 await promisify(fs.utimes)(path.join(__dirname, difference.path), new Date(), new Date(entry.mtime))
+                console.log(`SET ${difference.path}`)
             }
             else if (difference.type === 'stat') {
-                console.log(`SYNC ${difference.path}`)
                 await promisify(fs.utimes)(path.join(__dirname, difference.path), new Date(), new Date(entry.mtime))
+                console.log(`SYNC ${difference.path}`)
             }
         }))
 
