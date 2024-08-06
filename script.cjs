@@ -190,7 +190,7 @@ const os = require('os')
         else {
             console.log(`No local repo found, cloning from https://github.com/${user}/${repo}`)
             execSync(`git clone --bare https://github.com/${user}/${repo.toLowerCase()}.git`, { stdio: 'inherit' })
-            execSync(`git --git-dir=${repo.toLowerCase()}.git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"`)
+            execSync(`git --git-dir=${repo.toLowerCase()}.git config remote.origin.fetch ${localPath("+refs/heads/*:refs/remotes/origin/*")}`)
         }
         console.log('Repos synced')
     }
