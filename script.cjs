@@ -232,6 +232,7 @@ const os = require('os')
             await Promise.all((await promisify(fs.readdir)(path.join(__dirname, folderPath))).map(item => (async () => {
                 const itemPath = path.join(folderPath, item)
                 const stat = await promisify(fs.stat)(path.join(__dirname, itemPath))
+                const formattedPath = formatPath(itemPath)
                 if (stat.isDirectory()) {
                     if (!ignoredPaths.includes(item) && itemPath !== `${repo.toLowerCase()}.git` & itemPath !== tempFolder)
                         await scanFolder(itemPath)
@@ -240,22 +241,22 @@ const os = require('os')
                     if (!selfFiles.includes(itemPath)) {
                         let hash
                         if (repoPaths.includes(itemPath)) {
-                            const entry = index.currentFiles.find(entry => entry.path === itemPath)
+                            const entry = index.currentFiles.find(entry => entry.path === formattedPath)
                             if (Math.round(stat.mtimeMs) !== entry.mtime || stat.size !== entry.size) {
                                 hash = await hashFile(itemPath)
                                 if (hash === entry.hash)
-                                    differences.push({ path: formatPath(itemPath), type: 'stat' })
+                                    differences.push({ path: formattedPath, type: 'stat' })
                                 else
-                                    differences.push({ path: formatPath(itemPath), type: 'content' })
+                                    differences.push({ path: formattedPath, type: 'content' })
                             }
                             else
                                 hash = entry.hash
                         }
                         else {
                             hash = await hashFile(itemPath)
-                            differences.push({ path: formatPath(itemPath), type: 'local' })
+                            differences.push({ path: formattedPath, type: 'local' })
                         }
-                        localFiles.push({ path: formatPath(itemPath), mtime: Math.round(stat.mtimeMs), size: stat.size, hash })
+                        localFiles.push({ path: formattedPath, mtime: Math.round(stat.mtimeMs), size: stat.size, hash })
                     }
                 })())
             })()))
