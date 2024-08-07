@@ -24,6 +24,7 @@ const os = require('os')
         obj.author = 'Jacks-underscore-username'
         obj.bin = { egb: 'script.cjs' }
         obj.scripts.start = 'node script.cjs'
+        obj.name = 'EGB'
         fs.writeFileSync(path.join(__dirname, 'package.json'), JSON.stringify(obj, undefined, 4), 'utf8')
         execSync('npm link')
         fs.writeFileSync(path.join(__dirname, 'README.md'), [
