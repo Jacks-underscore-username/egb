@@ -383,7 +383,6 @@ const os = require('os')
             console.log('Sending commit')
 
         execSync('git push origin refs/heads/main:refs/heads/main', { stdio: 'inherit' })
-        // execSync('git push --set-upstream origin main', { stdio: 'inherit' })
 
         console.log('Commit pushed with message:')
         console.log(commitMessage)
