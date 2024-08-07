@@ -51,8 +51,8 @@ const os = require('os')
         process.exit(0)
     }
 
-    const formatPath = i => i.replace(/\/+|\\+/g, '/')
-    const localPath = (() => os.platform() === 'win32' ? (i => formatPath(i).replace(/\//g, '\\\\')) : (i => formatPath(i)))();
+    const formatPath = (inputPath, slash = '/') => inputPath.replace(/\/+|\\+/g, slash)
+    const localPath = (() => os.platform() === 'win32' ? (inputPath, slash = '\\') => formatPath(inputPath, slash) : (inputPath, slash = '/') => formatPath(inputPath, slash))();
 
     const { user, repo, tempFolder, ignoredPaths, passphrase } = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'config.json')))
 
@@ -190,7 +190,7 @@ const os = require('os')
         else {
             console.log(`No local repo found, cloning from https://github.com/${user}/${repo}`)
             execSync(`git clone --bare https://github.com/${user}/${repo.toLowerCase()}.git`, { stdio: 'inherit' })
-            execSync(`git --git-dir=${repo.toLowerCase()}.git config remote.origin.fetch ${localPath("+refs/heads/*:refs/remotes/origin/*")}`)
+            execSync(`git --git-dir=${repo.toLowerCase()}.git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"`)
         }
         console.log('Repos synced')
     }
@@ -269,7 +269,7 @@ const os = require('os')
             if (!localFiles.map(entry => entry.path).includes(itemPath))
                 differences.push({ path: formatPath(itemPath), type: 'remote' })
 
-        console.log(`Found ${differences.length} change${differences.length === 1 ? '' : 's'} in ${localFiles.length} file${localFiles.length === 1 ? '' : 's'}`)
+        console.log(`Found ${differences.length} change${differences.length === 1 ? '' : 's'} and ${localFiles.length} local file${localFiles.length === 1 ? '' : 's'}`)
         return { differences, localFiles }
     })()
 
@@ -283,24 +283,28 @@ const os = require('os')
         console.log('Creating file blobs')
         let sendingSize = 0
         let sendingFiles = 0
+        let savedFilePaths = index.files.map(entry => entry.path)
         await Promise.all(localFiles.map(entry => (async () => {
             const filePath = entry.path
             if (index.blobs[entry.hash] === undefined) {
                 const name = getRandomFileName()
                 await encryptFile(filePath, path.join(tempFolder, name))
                 const blob = (await promisify(exec)(`git hash-object -w "${path.join(__dirname, tempFolder, name)}"`)).stdout.toString().trim()
+                console.log(`Created new blob for ${filePath}`)
                 index.blobs[entry.hash] = blob
                 await promisify(fs.rm)(path.join(__dirname, tempFolder, name))
                 index.files = index.files.filter(entry => entry.path !== filePath)
+                savedFilePaths = savedFilePaths.filter(entry => entry !== filePath)
+                sendingSize += entry.size
+                sendingFiles++
+            }
+            if (!savedFilePaths.includes(filePath)) {
                 index.files.push({
                     path: filePath,
                     hash: entry.hash,
                     mtime: entry.mtime,
                     size: entry.size,
                 })
-                sendingSize += entry.size
-                sendingFiles++
-                console.log(`Created new blob for ${filePath}`)
             }
             index.currentFiles.push({
                 path: filePath,
@@ -311,7 +315,11 @@ const os = require('os')
             })
         })()))
 
-        localFiles.forEach(entry => index.files.find(subEntry => subEntry.path === entry.path).mtime = entry.mtime)
+        const savedFileMap = Object.fromEntries(index.files.map(entry => [entry.path, entry]))
+        localFiles.forEach(entry => {
+            if (savedFileMap[entry.path] === undefined) console.error(savedFileMap[entry.path], entry, savedFilePaths.includes(entry.path))
+            savedFileMap[entry.path].mtime = entry.mtime
+        })
 
         console.log('Assembling commit')
 
