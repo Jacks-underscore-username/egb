@@ -52,7 +52,7 @@ const os = require('os')
     }
 
     const formatPath = (inputPath, slash = '/') => inputPath.replace(/\/+|\\+/g, slash)
-    const localPath = (() => os.platform() === 'win32' ? (inputPath, slash = '\\') => formatPath(inputPath, slash) : (inputPath, slash = '/') => formatPath(inputPath, slash))();
+    const localPath = (() => os.platform() === 'win32' ? inputPath => formatPath(inputPath, '\\') : inputPath => formatPath(inputPath, '/'))();
 
     const { user, repo, tempFolder, ignoredPaths, passphrase } = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'config.json')))
 
