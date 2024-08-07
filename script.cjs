@@ -52,7 +52,7 @@ const os = require('os')
     }
 
     const formatPath = (inputPath, slash = '/') => inputPath.replace(/\/+|\\+/g, slash)
-    const localPath = (() => os.platform() === 'win32' ? inputPath => formatPath(inputPath, '\\') : inputPath => formatPath(inputPath, '/'))();
+    const localPath = (() => os.platform() === 'win32' ? (inputPath, slash = '\\') => formatPath(inputPath, slash) : (inputPath, slash = '/') => formatPath(inputPath, slash))();
 
     const { user, repo, tempFolder, ignoredPaths, passphrase } = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'config.json')))
 
@@ -144,21 +144,22 @@ const os = require('os')
 
     //Ensure the repo exists and is up to date.
     try {
-        if (os.platform() === 'win32') {
-            try {
-                let toldOfPinging
-                const handle = setTimeout(() => {
-                    console.log('Pinging github...')
-                    toldOfPinging = true
-                }, 1000)
+        try {
+            let toldOfPinging
+            const handle = setTimeout(() => {
+                console.log('Pinging github...')
+                toldOfPinging = true
+            }, 1000)
+            if (os.platform() === 'win32')
                 execSync('ping -n 1 -l 1 github.com')
-                clearTimeout(handle)
-                if (toldOfPinging) console.log('Got response')
-            }
-            catch (e) {
-                console.error('Cannot connect to github, check your internet connection or https://githubstatus.com')
-                process.exit(1)
-            }
+            else
+                execSync('ping -c 1 -s 1 -w 5 github.com')
+            clearTimeout(handle)
+            if (toldOfPinging) console.log('Got response')
+        }
+        catch (e) {
+            console.error('Cannot connect to github, check your internet connection or https://githubstatus.com')
+            process.exit(1)
         }
         console.log('Checking for remote repo...')
         try {
