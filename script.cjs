@@ -46,8 +46,7 @@ const os = require('os')
             '### Usage',
             'Just run ```egb save``` or ```egb load``` in any terminal.',
             '',
-            '***Created by [Jacks-underscore-username](https://github.com/Jacks-underscore-username)***'
-        ].join('\n'), 'utf8')
+            '***Created by [Jacks-underscore-username](https://github.com/Jacks-underscore-username), read more at [my blog.](https://jacks-project-hub.vercel.app/posts/Github%20backup/)***'].join('\n'), 'utf8')
         console.log('Config file generated, finish setup by filling it out, then run egb save / egb load to use.')
         process.exit(0)
     }

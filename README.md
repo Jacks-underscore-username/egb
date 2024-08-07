@@ -16,4 +16,4 @@ Thats it! You are now ready to use the EGB system.
 ### Usage
 Just run ```egb save``` or ```egb load``` in any terminal.
 
-***Created by [Jacks-underscore-username](https://github.com/Jacks-underscore-username)***
+***Created by [Jacks-underscore-username](https://github.com/Jacks-underscore-username), read more at [my blog.](https://jacks-project-hub.vercel.app/posts/Github%20backup/)***
