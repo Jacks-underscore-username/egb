@@ -186,6 +186,7 @@ const os = require('os')
         if (fs.existsSync(path.join(__dirname, `${repo.toLowerCase()}.git`))) {
             console.log('Local repo found, fetching changes...')
             execSync(`git --git-dir=${repo.toLowerCase()}.git fetch origin main`, { stdio: 'inherit' })
+            execSync(`git --git-dir=${repo.toLowerCase()}.git update-ref refs/heads/main refs/remotes/origin/main`, { stdio: 'inherit' })
         }
         else {
             console.log(`No local repo found, cloning from https://github.com/${user}/${repo}`)
