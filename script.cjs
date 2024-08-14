@@ -238,7 +238,7 @@ const os = require('os')
                 const stat = await promisify(fs.stat)(path.join(__dirname, itemPath))
                 const formattedPath = formatPath(itemPath)
                 if (stat.isDirectory()) {
-                    if (!ignoredPaths.includes(item) && itemPath !== `${repo.toLowerCase()}.git` & itemPath !== tempFolder && !extraIgnores.includes(path.join(__dirname, itemPath)))
+                    if (!ignoredPaths.includes(item) && itemPath !== `${repo.toLowerCase()}.git` & itemPath !== tempFolder && !extraIgnores.includes(item))
                         await scanFolder(itemPath)
                 }
                 else filePromises.push((async () => {
