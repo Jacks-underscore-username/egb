@@ -463,4 +463,7 @@ const os = require('os')
         await load()
 
     fs.rmSync(path.join(__dirname, tempFolder), { recursive: true, force: true })
+
+    if (os.platform() === 'linux' || os.platform() === 'android')
+        execSync('chmod +x script.cjs')
 })()
