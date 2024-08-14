@@ -232,6 +232,7 @@ const os = require('os')
         //Recursively scans the folder and pushes any files to the filePromises array while checking for differences.
         const scanFolder = async folderPath => {
             const extraIgnores = ['.egb_ignore', ...((fs.existsSync(path.join(__dirname, folderPath, '.egb_ignore')) && (await promisify(fs.readFile)(path.join(__dirname, folderPath, '.egb_ignore'), 'utf8')).split('\r\n').map(line => line.trim())) || [])]
+            console.log(extraIgnores)
             await Promise.all((await promisify(fs.readdir)(path.join(__dirname, folderPath))).map(item => (async () => {
                 const itemPath = path.join(folderPath, item)
                 const stat = await promisify(fs.stat)(path.join(__dirname, itemPath))
