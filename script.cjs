@@ -56,9 +56,6 @@ const os = require('os')
         process.exit(0)
     }
 
-    if (os.platform() === 'linux' || os.platform() === 'android')
-        execSync('chmod +x script.cjs')
-
     const formatPath = (inputPath, slash = '/') => inputPath.replace(/\/+|\\+/g, slash)
     const localPath = (() => os.platform() === 'win32' ? (inputPath, slash = '\\') => formatPath(inputPath, slash) : (inputPath, slash = '/') => formatPath(inputPath, slash))();
 
