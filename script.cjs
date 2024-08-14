@@ -26,7 +26,12 @@ const os = require('os')
         obj.scripts.start = 'node script.cjs'
         obj.name = 'EGB'
         fs.writeFileSync(path.join(__dirname, 'package.json'), JSON.stringify(obj, undefined, 4), 'utf8')
-        execSync('npm link')
+        try {
+            execSync('npm link')
+        }
+        catch (e) {
+            console.error('There was an error running npm link')
+        }
         fs.writeFileSync(path.join(__dirname, 'README.md'), [
             '# Encrypted Github Backups (EGB)',
             '',
@@ -50,6 +55,9 @@ const os = require('os')
         console.log('Config file generated, finish setup by filling it out, then run egb save / egb load to use.')
         process.exit(0)
     }
+
+    if (os.platform() === 'linux' || os.platform() === 'android')
+        execSync('chmod +x script.cjs')
 
     const formatPath = (inputPath, slash = '/') => inputPath.replace(/\/+|\\+/g, slash)
     const localPath = (() => os.platform() === 'win32' ? (inputPath, slash = '\\') => formatPath(inputPath, slash) : (inputPath, slash = '/') => formatPath(inputPath, slash))();
