@@ -18,7 +18,7 @@ const os = require('os')
         else
             fs.writeFileSync(path.join(__dirname, 'config.json'), JSON.stringify({ user: 'Repo author', repo: 'Storage repo', tempFolder: 'backup_temp', ignoredPaths: ['node_modules'], passphrase: 'SuperSecretPassphrase' }, undefined, 4))
         if (os.platform() === 'linux' || os.platform() === 'android')
-            execSync('chmod +x script.cjs')
+            execSync(`chmod +x ${path.join(__dirname,'script.cjs')}`)
         execSync('npm init -y')
         const obj = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json')))
         obj.author = 'Jacks-underscore-username'
@@ -462,5 +462,5 @@ const os = require('os')
     fs.rmSync(path.join(__dirname, tempFolder), { recursive: true, force: true })
 
     if (os.platform() === 'linux' || os.platform() === 'android')
-        execSync('chmod +x script.cjs')
+        execSync(`chmod +x ${path.join(__dirname,'script.cjs')}`)
 })()
