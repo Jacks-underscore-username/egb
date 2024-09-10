@@ -18,38 +18,47 @@ const os = require('os')
             fs.writeFileSync(path.join(__dirname, 'config.json'), JSON.stringify({ user: 'Repo author', repo: 'Storage repo', tempFolder: 'backup_temp', ignoredPaths: ['node_modules'], passphrase: 'SuperSecretPassphrase' }, undefined, 4))
         if (os.platform() === 'linux' || os.platform() === 'android')
             execSync('chmod +x script.js')
+                ;
+        ((filePath, commandName) => {
 
-        const osType = os.platform()
+            if (!fs.existsSync(filePath)) {
+                console.log(`Error: The file at ${filePath} does not exist.`)
+            }
 
-        if (osType === 'win32') {
-            const windowsPath = process.env.USERPROFILE
-            const batFileContent = `@echo off\nnode ${path.resolve('script.js')} %*\n`
+            const osType = os.platform()
 
-            const batFilePath = path.join(windowsPath, 'egb.bat')
+            if (osType === 'win32') {
+                const windowsPath = process.env.USERPROFILE
+                const batFilePath = path.join(windowsPath, `${commandName}.bat`)
+                const batFileContent = `@echo off\nnode "${path.resolve(filePath)}" %*\n`
 
-            fs.writeFileSync(batFilePath, batFileContent)
+                if (fs.existsSync(batFilePath) && fs.readFileSync(batFilePath, 'utf8') === batFileContent)
+                    return false
 
-            const setEnvCmd = `[System.Environment]::SetEnvironmentVariable('Path', $env:Path + ';${windowsPath}', [System.EnvironmentVariableTarget]::User)`
+                fs.writeFileSync(batFilePath, batFileContent)
 
-            exec(`powershell -Command "${setEnvCmd}"`, (error, stdout, stderr) => {
-                if (error)
-                    console.error(`Error adding to PATH: ${error.message}`)
-                else {
-                    exec('$env:Path = [System.Environment]::GetEnvironmentVariable(\'Path\', [System.EnvironmentVariableTarget]::User)')
-                    console.log('Success! You can now use \'egb\' to run your script globally.')
-                }
-            })
+                const setEnvCmd = `[System.Environment]::SetEnvironmentVariable('Path', $env:Path + ';${windowsPath}', [System.EnvironmentVariableTarget]::User)`
 
-        }
-        else if (['linux', 'android', 'darwin'].includes(osType)) {
-            const shellConfigFile = path.join(os.homedir(), '.bashrc')
-            const aliasCommand = `alias egb='node ${path.resolve('script.js')}'`
+                execSync(`powershell -Command "${setEnvCmd}"`)
+                execSync('powershell -Command "$env:Path = [System.Environment]::GetEnvironmentVariable(\'Path\', [System.EnvironmentVariableTarget]::User)"')
+                return true
+            }
+            else if (['linux', 'android', 'darwin'].includes(osType)) {
+                const shellConfigFile = path.join(os.homedir(), '.bashrc')
+                const aliasCommand = `alias ${commandName}='node ${path.resolve(filePath)}'`
 
-            fs.appendFileSync(shellConfigFile, `\n# Added by script\n${aliasCommand}\n`)
+                const bashrcContent = fs.readFileSync(shellConfigFile, 'utf8')
 
-            console.log('Success! Added egb alias. Run \'source ~/.bashrc\' or restart your terminal to apply the changes.')
-        } else
-            console.log(`Unsupported OS: ${osType}`)
+                if (bashrcContent.split('\n').includes(aliasCommand))
+                    return false
+
+                fs.appendFileSync(shellConfigFile, `\n# Added by script\n${aliasCommand}\n`)
+
+                console.log(`Success! Added ${commandName} alias. Run 'source ~/.bashrc' or restart your terminal to apply the changes.`)
+                return true
+            } else
+                console.log(`Unsupported OS: ${osType}`)
+        })('script.js', 'egb')
 
         fs.writeFileSync(path.join(__dirname, 'README.md'), [
             '# Encrypted Github Backups (EGB)',
