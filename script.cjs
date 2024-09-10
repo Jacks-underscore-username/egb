@@ -10,7 +10,7 @@ const os = require('os')
     ;
 (async () => {
     if (!fs.existsSync(path.join(__dirname, 'package.json'))) {
-        if (fs.existsSync(__dirname, 'config.json')) {
+        if (fs.existsSync(path.join(__dirname, 'config.json'))) {
             const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')))
             if (!['user', 'repo', 'tempFolder', 'ignoredPaths', 'passphrase'].every(key => config[key] !== undefined))
                 fs.writeFileSync(path.join(__dirname, 'config.json'), JSON.stringify({ user: 'Repo author', repo: 'Storage repo', tempFolder: 'backup_temp', ignoredPaths: ['node_modules'], passphrase: 'SuperSecretPassphrase' }, undefined, 4))
