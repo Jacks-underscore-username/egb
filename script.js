@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const fs = require('fs')
 const { execSync, exec } = require('child_process')
 const path = require('path')
@@ -7,9 +5,10 @@ const crypto = require('crypto')
 const { promisify } = require('util')
 const readline = require('readline')
 const os = require('os')
+
     ;
 (async () => {
-    if (!fs.existsSync(path.join(__dirname, 'package.json'))) {
+    if (['README.md', 'config.json'].some(file => !fs.existsSync(path.join(__dirname, file)))) {
         if (fs.existsSync(path.join(__dirname, 'config.json'))) {
             const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')))
             if (!['user', 'repo', 'tempFolder', 'ignoredPaths', 'passphrase'].every(key => config[key] !== undefined))
@@ -18,20 +17,40 @@ const os = require('os')
         else
             fs.writeFileSync(path.join(__dirname, 'config.json'), JSON.stringify({ user: 'Repo author', repo: 'Storage repo', tempFolder: 'backup_temp', ignoredPaths: ['node_modules'], passphrase: 'SuperSecretPassphrase' }, undefined, 4))
         if (os.platform() === 'linux' || os.platform() === 'android')
-            execSync('chmod +x script.cjs')
-        execSync('npm init -y')
-        const obj = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json')))
-        obj.author = 'Jacks-underscore-username'
-        obj.bin = { egb: 'script.cjs' }
-        obj.scripts.start = 'node script.cjs'
-        obj.name = 'EGB'
-        fs.writeFileSync(path.join(__dirname, 'package.json'), JSON.stringify(obj, undefined, 4), 'utf8')
-        try {
-            execSync('npm link')
+            execSync('chmod +x script.js')
+
+        const osType = os.platform()
+
+        if (osType === 'win32') {
+            const windowsPath = process.env.USERPROFILE
+            const batFileContent = `@echo off\nnode ${path.resolve('script.js')} %*\n`
+
+            const batFilePath = path.join(windowsPath, 'egb.bat')
+
+            fs.writeFileSync(batFilePath, batFileContent)
+
+            const setEnvCmd = `[System.Environment]::SetEnvironmentVariable('Path', $env:Path + ';${windowsPath}', [System.EnvironmentVariableTarget]::User)`
+
+            exec(`powershell -Command "${setEnvCmd}"`, (error, stdout, stderr) => {
+                if (error)
+                    console.error(`Error adding to PATH: ${error.message}`)
+                else {
+                    exec('$env:Path = [System.Environment]::GetEnvironmentVariable(\'Path\', [System.EnvironmentVariableTarget]::User)')
+                    console.log('Success! You can now use \'egb\' to run your script globally.')
+                }
+            })
+
         }
-        catch (e) {
-            console.error('There was an error running npm link')
-        }
+        else if (['linux', 'android', 'darwin'].includes(osType)) {
+            const shellConfigFile = path.join(os.homedir(), '.bashrc')
+            const aliasCommand = `alias egb='node ${path.resolve('script.js')}'`
+
+            fs.appendFileSync(shellConfigFile, `\n# Added by script\n${aliasCommand}\n`)
+
+            console.log('Success! Added egb alias. Run \'source ~/.bashrc\' or restart your terminal to apply the changes.')
+        } else
+            console.log(`Unsupported OS: ${osType}`)
+
         fs.writeFileSync(path.join(__dirname, 'README.md'), [
             '# Encrypted Github Backups (EGB)',
             '',
@@ -40,10 +59,10 @@ const os = require('os')
             '(*note: this guide assumes you have node already installed and have your device authenticated with github through gh*)',
             '',
             '### Setup',
-            ' 1. Download the ```script.cjs``` file from this repo and put it in the folder you that will be backed up.',
-            ' 1. Run ```node script.cjs``` in a terminal opened to said folder. (note: the first two steps can be skipped by running one of these os specific commands in a terminal opened to the folder:)',
-            ' * Windows: ```Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Jacks-underscore-username/egb/main/script.cjs" -OutFile "script.cjs" && node script.cjs```',
-            ' * Linux: ```curl -O https://raw.githubusercontent.com/Jacks-underscore-username/egb/main/script.cjs && chmod +x script.cjs && node script.cjs```',
+            ' 1. Download the ```script.js``` file from this repo and put it in the folder you that will be backed up.',
+            ' 1. Run ```node script.js``` in a terminal opened to said folder. (note: the first two steps can be skipped by running one of these os specific commands in a terminal opened to the folder:)',
+            ' * Windows: ```Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Jacks-underscore-username/egb/main/script.js" -OutFile "script.js" && node script.js```',
+            ' * Linux: ```curl -O https://raw.githubusercontent.com/Jacks-underscore-username/egb/main/script.js && chmod +x script.js && node script.js```',
             ' 1. Edit the ```user```, ```repo```, and ```passphrase``` values in the auto generated ```config.json``` file.',
             '',
             'Thats it! You are now ready to use the EGB system. ',
@@ -72,7 +91,7 @@ const os = require('os')
     const salt = crypto.randomBytes(16).toString('binary')
     const key = crypto.scryptSync(passphrase, salt, 32)
 
-    const extraRepoFiles = ['script.cjs', 'README.md']
+    const extraRepoFiles = ['script.js', 'README.md']
     const selfFiles = ['index.json', 'config.json']
 
     if (!fs.existsSync(path.join(__dirname, tempFolder)))
@@ -462,5 +481,5 @@ const os = require('os')
     fs.rmSync(path.join(__dirname, tempFolder), { recursive: true, force: true })
 
     if (os.platform() === 'linux' || os.platform() === 'android')
-        execSync('chmod +x script.cjs')
+        execSync('chmod +x script.js')
 })()
