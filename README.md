@@ -6,9 +6,9 @@
 
 ### Setup
  1. Download the ```script.js``` file from this repo and put it in the folder you that will be backed up.
- 1. Run ```node script.js``` in a terminal opened to said folder. (note: the first two steps can be skipped by running one of these os specific commands in a terminal opened to the folder:)
+ 1. Run ```node script``` in a terminal opened to said folder. (note: the first two steps can be skipped by running one of these os specific commands in a terminal opened to the folder:)
  * Windows: ```Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Jacks-underscore-username/egb/main/script.js" -OutFile "script.js" && node script.js```
- * Linux: ```curl -O https://raw.githubusercontent.com/Jacks-underscore-username/egb/main/script.js && chmod +x script.js && node script.js```
+ * Linux: ```curl -O https://raw.githubusercontent.com/Jacks-underscore-username/egb/main/script.js && chmod +x script.js && node script```
  1. Edit the ```user```, ```repo```, and ```passphrase``` values in the auto generated ```config.json``` file.
 
 Thats it! You are now ready to use the EGB system. 
